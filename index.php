@@ -87,7 +87,7 @@ function requestData() {
     });
 }
 
-function showchart () {
+function showchart (rate) {
 	var winW = $(window).width() - 180;
 	var winH = $(window).height() - 180;
 
@@ -99,6 +99,7 @@ function showchart () {
 			chart = null;
 		}
 	 });
+	Highcharts.setOptions({global: {useUTC: false}});
 	chart = new Highcharts.Chart({
 
         chart: {
@@ -119,6 +120,8 @@ function showchart () {
         yAxis: {
             minPadding: 0.2,
             maxPadding: 0.2,
+            max: (rate * 1024) + (rate * 1024)/5,
+            endOnTick: false,
             title: {
                 text: 'Bps',
                 margin: 80
@@ -140,14 +143,15 @@ function activateselect() {
 	// Deactivate, might make double fire
 	$(".act").off();
 	$(".act").change( function (e) {
-		var username = $(this).closest("tr").children("td:nth-of-type(2)").text();
-		var intf = $(this).closest("tr").children("td:nth-of-type(1)").text();
+		var username = $(this).closest("tr").children("th:nth-of-type(2)").text();
+		var intf = $(this).closest("tr").children("th:nth-of-type(1)").text();
+		var rate = $(this).closest("tr").children("th:nth-of-type(5)").text().split("/")[0];
 		var op = $(this).val();
 		if (op == "watch") {
 			$(".act").val('');
 			chart_interface = intf;
 			console.log('interface ' + intf);
-			showchart();
+			showchart(rate);
 		} else {
 		   $("#loadingdialog").dialog('open');
 		   $(".ui-dialog-titlebar").hide();
