@@ -104,7 +104,7 @@ function showchart (rate) {
 
         chart: {
             renderTo: 'ifchart',
-            defaultSeriesType: 'spline',
+            defaultSeriesType: 'line',
             events: {
                 load: requestData
             }
@@ -125,6 +125,19 @@ function showchart (rate) {
             title: {
                 text: 'Bps',
                 margin: 80
+            }
+        },
+	plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true,
+                    formatter: function()
+                    { var value = (this.y);
+                      if (value > 1024 * 1024) return (value/1024/1024).toPrecision(3) + 'M';
+                      if (value > 1024) return Math.floor(value/1024) + 'K';
+                    },
+                },
+            enableMouseTracking: false
             }
         },
         series: [{
