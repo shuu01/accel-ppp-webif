@@ -131,10 +131,11 @@ function showchart (rate) {
             line: {
                 dataLabels: {
                     enabled: true,
-                    formatter: function()
-                    { var value = (this.y);
-                      if (value > 1024 * 1024) return (value/1024/1024).toPrecision(3) + 'M';
-                      if (value > 1024) return Math.floor(value/1024) + 'K';
+                    formatter: function() {
+                        var value = (this.y);
+                        if (value > 1024 * 1024) return (value/1024/1024).toPrecision(3) + 'M';
+                        if (value > 1024) return Math.floor(value/1024) + 'K';
+		        return value;
                     },
                 },
             enableMouseTracking: false
