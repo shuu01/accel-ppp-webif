@@ -157,9 +157,9 @@ function activateselect() {
 	// Deactivate, might make double fire
 	$(".act").off();
 	$(".act").change( function (e) {
-		var username = $(this).closest("tr").children("th:nth-of-type(2)").text();
-		var intf = $(this).closest("tr").children("th:nth-of-type(1)").text();
-		var rate = $(this).closest("tr").children("th:nth-of-type(5)").text().split("/")[0];
+		var username = $(this).closest("tr").children("td:nth-of-type(2)").text();
+		var intf = $(this).closest("tr").children("td:nth-of-type(1)").text();
+		var rate = $(this).closest("tr").children("td:nth-of-type(5)").text().split("/")[0];
 		var op = $(this).val();
 		if (op == "watch") {
 			$(".act").val('');
