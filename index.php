@@ -225,9 +225,9 @@ function activator (event, ui) {
 			// fix and add thead, datatables love it and need it
 			$("#tusers").prepend($('<thead></thead>').append($('#tusers tr:first').remove()));
 			// and also th for better styling
-			$("tr:first-child td").each(function() {
-				$(this).replaceWith('<th>' + $(this).text() + '</th>'); 
-			});
+			//$("tr:first-child td").each(function() {
+			//	$(this).replaceWith('<th>' + $(this).text() + '</th>'); 
+			//});
 
 			$("#tusers tr:eq(0)").append('<th>Operation</th>');
 			$("#tusers tr:gt(0)").append('<td><select class="act" name="act"><option selected></option><option value="killhard">Terminate(hard)</option><option value="killsoft">Terminate(soft)</option><option value="watch">Watch live</option></select></td>');
