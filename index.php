@@ -238,7 +238,19 @@ function activator (event, ui) {
 			});
 
 			
-			table = $("#tusers").dataTable({ "iDisplayLength": 10 }).on('draw.dt', function (e, settings) {
+			table = $("#tusers").dataTable(
+				{ "iDisplayLength": 10,
+				  "columnDefs": [
+				  {
+				  // The `data` parameter refers to the data for the cell (defined by the
+                                  // `data` option, which defaults to the column being worked with, in
+                                  // this case `data: 0`.
+                                    "render": function ( data, type, row ) {
+                                      return '<a href="http://' + data + '" target="_blank">' + data + '</a>';
+                                    },
+                                  "targets": [2, 3]
+                                  }]
+				}).on('draw.dt', function (e, settings) {
 				activateselect();
 			});
 			// Because draw is not fired on first event, we will fire manually
