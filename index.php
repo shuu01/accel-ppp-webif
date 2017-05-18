@@ -312,7 +312,13 @@ function prelogin(data) {
 
 $(document).ready(function(){
 	$("#mainscreen").hide();
-	$("#logindialog").dialog({ autoOpen: false, buttons: [ { text: "Login", click: trylogin } ], title: "accel-ppp login" });
+	$("#logindialog").dialog({ autoOpen: false, buttons: [ { text: "Login", click: trylogin } ], title: "accel-ppp login", open: function() {
+          $("#logindialog").keypress(function(e) {
+            if (e.keyCode == $.ui.keyCode.ENTER) {
+              $(this).parent().find("button:eq(1)").trigger("click");
+            }
+          });
+        } });
 	$("#loadingdialog").dialog({ autoOpen: false, modal: true });
 	$.post( "data.php", { action: "prelogin" }, prelogin );
 });
