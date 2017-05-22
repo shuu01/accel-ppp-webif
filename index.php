@@ -33,6 +33,7 @@ body {
 <ul>
     <li><a href="#tabmain">Main</a></li>
     <li><a href="#tabusers">Users</a></li>
+    <li><a href="mrtg/index.php">Graphs</a></li>
     <li><a href="#tabsettings">Settings</a></li>
     <li><a href="#tablogout">Logout</a></li>
   </ul>
