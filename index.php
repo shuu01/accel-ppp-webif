@@ -88,7 +88,7 @@ function requestData() {
     });
 }
 
-function showchart (rate) {
+function showchart (rate, username) {
 	var winW = $(window).width() - 180;
 	var winH = $(window).height() - 180;
 
@@ -111,7 +111,7 @@ function showchart (rate) {
             }
         },
         title: {
-            text: 'Interface statistics'
+            text: username + '|| ' + rate + ' kbps'
         },
         xAxis: {
             type: 'datetime',
@@ -121,7 +121,7 @@ function showchart (rate) {
         yAxis: {
             minPadding: 0.2,
             maxPadding: 0.2,
-            max: (rate * 1024) + (rate * 1024)/5,
+            max: (rate * 1024) + (rate * 1024)/2,
             endOnTick: false,
             title: {
                 text: 'Bps',
@@ -166,7 +166,7 @@ function activateselect() {
 			$(".act").val('');
 			chart_interface = intf;
 			console.log('interface ' + intf);
-			showchart(rate);
+			showchart(rate, username);
 		} else {
 		   $("#loadingdialog").dialog('open');
 		   $(".ui-dialog-titlebar").hide();
