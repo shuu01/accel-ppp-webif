@@ -173,7 +173,7 @@ function reply_click(obj) {
         });
     }
 }
-	
+
 function loadmain() {
         $.post("data.php", { action: "stat" }, function (ret) {
                 $("#tabmain pre").html(ret.output);
