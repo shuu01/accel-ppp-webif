@@ -152,35 +152,28 @@ function showchart (rate, username) {
     });
 }
 
-
-function activateselect() {
-//	$(".act").selectmenu();
-	// Deactivate, might make double fire
-	$(".act").off();
-	$(".act").change( function (e) {
-		var username = $(this).closest("tr").children("td:nth-of-type(2)").text();
-		var intf = $(this).closest("tr").children("td:nth-of-type(1)").text();
-		var rate = $(this).closest("tr").children("td:nth-of-type(5)").text().split("/")[0];
-		var op = $(this).val();
-		if (op == "watch") {
-			$(".act").val('');
-			chart_interface = intf;
-			console.log('interface ' + intf);
-			showchart(rate, username);
-		} else {
-		   $("#loadingdialog").dialog('open');
-		   $(".ui-dialog-titlebar").hide();
-		   $.post("data.php", { action: op, interface: intf }, function (ret) {
-			setTimeout(function() { 
-				$(".act").val('');
-				$("#loadingdialog").dialog('close');
-			}, 1000);
-
-		   });
-		}
-	});
+function reply_click(obj) {
+    var username = $(obj).closest("tr").children("td:nth-of-type(2)").text();
+    var intf = $(obj).closest("tr").children("td:nth-of-type(1)").text();
+    var rate = $(obj).closest("tr").children("td:nth-of-type(5)").text().split("/")[0];
+    var id = obj.id;
+    if (id == "watch") {
+        chart_interface = intf;
+        console.log('interface ' + intf);
+        showchart(rate, username);
+    }
+    else {
+        $("#loadingdialog").dialog('open');
+        $(".ui-dialog-titlebar").hide();
+        $.post("data.php", { action: id, interface: intf }, function (ret) {
+            setTimeout(function() {
+                $(".act").val('');
+                $("#loadingdialog").dialog('close');
+            }, 1000);
+        });
+    }
 }
-
+	
 function loadmain() {
         $.post("data.php", { action: "stat" }, function (ret) {
                 $("#tabmain pre").html(ret.output);
@@ -231,7 +224,7 @@ function activator (event, ui) {
 			//});
 
 			$("#tusers tr:eq(0)").append('<th>Operation</th>');
-			$("#tusers tr:gt(0)").append('<td><select class="act" name="act"><option selected></option><option value="killhard">Terminate(hard)</option><option value="killsoft">Terminate(soft)</option><option value="watch">Watch live</option></select></td>');
+			$("#tusers tr:gt(0)" ).append('<td><button id="watch" style="float: left" onClick="reply_click(this)">Watch</button><button style="float: right; color: red;" onClick="reply_click(this)">Kill</button></td>');
 
 			$("#tusers tr").click( function() { 
 				// We can do something on row click... later.
@@ -251,12 +244,7 @@ function activator (event, ui) {
                                     },
                                   "targets": [2, 3]
                                   }]
-				}).on('draw.dt', function (e, settings) {
-				activateselect();
-			});
-			// Because draw is not fired on first event, we will fire manually
-			activateselect();
-			//$(".act").selectmenu();
+				}).on('draw.dt');
 
 			// Get user detailed info
 			$("#loadingdialog").dialog('close');
@@ -281,7 +269,6 @@ function showmainscreen () {
 		}
 	});
 }
-
 
 function trylogin(event) {
 	event.preventDefault();
