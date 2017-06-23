@@ -67,20 +67,20 @@ function runcmd ($cmd) {
 session_start();
 header('Content-Type: application/json');
 switch($_POST{'action'}) {
-    case 'prelogin':
-        $arr = array();
-        $arr{'action'} = "prelogin"; //debug
-        if (isset($_SESSION{'login'})) {
-            $arr{'login'} = $_SESSION{'login'};
-        }
-        if (isset($_SESSION{'authenticated'})) {
-            $arr{'authenticated'} = $_SESSION{'authenticated'};
-        }
-        echo json_encode($arr);
-        break;
-    case 'login':
-        $arr = array();
-        $arr{'status'} = "Login or password not set";
+	case 'prelogin':
+		$arr = array();
+		$arr{'action'} = "prelogin"; //debug
+		if (isset($_SESSION{'login'})) {
+			$arr{'login'} = $_SESSION{'login'};
+		}
+		if (isset($_SESSION{'authenticated'})) {
+			$arr{'authenticated'} = $_SESSION{'authenticated'};
+		}
+		echo json_encode($arr);
+		break;
+	case 'login':
+		$arr = array();
+		$arr{'status'} = "Login or password not set";
 		if (isset($_POST{'login'}) && isset($_POST{'password'})) {
 			// We should use hash_equals
 			if ($_POST{'login'} == "admin" && !semi_hash_equals(crypt($_POST{'password'}, $secret), $secret)) {
