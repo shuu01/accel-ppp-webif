@@ -273,10 +273,7 @@ function activator (event, ui) {
                 $("#mainscreen").tabs("option", "active", 0);
                 setTimeout(function () { $("#mainscreen").tabs("option", "active", 1); }, 200);
             });
-            //$("#tusers tr").click( function() {
-                // We can do something on row click... later.
-                //var username = $(this).children("td:nth-of-type(2)").text();
-            //});
+
             table = $("#tusers").DataTable({ "data": ret.output, "iDisplayLength": 25, "columnDefs":[
             // The `data` parameter refers to the data for the cell (defined by the
             // `data` option, which defaults to the column being worked with, in
