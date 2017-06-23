@@ -67,20 +67,20 @@ function runcmd ($cmd) {
 session_start();
 header('Content-Type: application/json');
 switch($_POST{'action'}) {
-	case 'prelogin':
-		$arr = array();
-		$arr{'action'} = "prelogin"; //debug
-		if (isset($_SESSION{'login'})) {
-			$arr{'login'} = $_SESSION{'login'};
-		}
-		if (isset($_SESSION{'authenticated'})) {
-			$arr{'authenticated'} = $_SESSION{'authenticated'};
-		}
-		echo json_encode($arr);
-		break;
-	case 'login':
-		$arr = array();
-		$arr{'status'} = "Login or password not set";
+    case 'prelogin':
+        $arr = array();
+        $arr{'action'} = "prelogin"; //debug
+        if (isset($_SESSION{'login'})) {
+            $arr{'login'} = $_SESSION{'login'};
+        }
+        if (isset($_SESSION{'authenticated'})) {
+            $arr{'authenticated'} = $_SESSION{'authenticated'};
+        }
+        echo json_encode($arr);
+        break;
+    case 'login':
+        $arr = array();
+        $arr{'status'} = "Login or password not set";
 		if (isset($_POST{'login'}) && isset($_POST{'password'})) {
 			// We should use hash_equals
 			if ($_POST{'login'} == "admin" && !semi_hash_equals(crypt($_POST{'password'}, $secret), $secret)) {
@@ -104,18 +104,21 @@ switch($_POST{'action'}) {
 		$arr = runcmd('accel-cmd show stat');
 		echo json_encode($arr);
 		break;
-
-	case 'users':
-		checkauth();
-		$arr = runcmd('accel-cmd show sessions');
-		$output2 = preg_replace('/\n/m', "</td></tr>\n<tr><td>",$arr{'output'});
-		//$output2 = preg_replace('/^/m','<tr><td>',$output2);
-		$output2 = preg_replace('/\|/m','</td><td>',$output2);
-		$output2 = preg_replace('/<tr><td>$/','',$output2); // final
-		$final .= '<table id="tusers" class="cell-border"><tbody><tr><td>' . $output2 . '</tbody></table>';
-		$arr{'output'} = $final;
-		echo json_encode($arr);
-		break;
+	
+    case 'users':
+        checkauth();
+        $arr = runcmd('accel-cmd show sessions');
+        $strings = explode("\r\n", $arr{'output'});
+        $strings1 = [];
+        $count = count($strings);
+        for ($i = 2; $i < $count-1; $i++) {
+            $values = str_replace(' ', '', $strings[$i]);
+            $values = explode("|", $values);
+            $strings1[] = $values;
+        }
+        $arr{'output'} = $strings1;
+        echo json_encode($arr);
+        break;
 
 	case 'killsoft':
 		checkauth();
