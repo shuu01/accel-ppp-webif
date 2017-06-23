@@ -120,11 +120,27 @@ switch($_POST{'action'}) {
         echo json_encode($arr);
         break;
 
-	case 'killsoft':
+	case 'start_dump':
 		checkauth();
-		$arr = runcmd('accel-cmd terminate if '.escapeshellcmd(trim($_POST{'interface'}))." soft");
+		$intf = $_POST{'interface'};
+		runcmd('sudo tcpdump -l -n -i '.$intf.' 2>/dev/null > /var/tmp/'.$intf.'.dump & echo $! > /var/tmp/'.$intf.'.pid');
 		echo json_encode($arr);
 		break;
+
+	case 'stop_dump':
+		checkauth();
+		$intf = $_POST{'interface'};
+		runcmd('sudo kill -15 $(cat /var/tmp/'.$intf.'.pid)');
+		$arr = runcmd('cat /var/tmp/'.$intf.'.dump');
+		runcmd('rm /var/tmp/'.$intf.'.*');
+		echo json_encode($arr);
+		break;
+		
+	case 'drop':
+		checkauth();
+		$arr = runcmd('accel-cmd terminate csid '.escapeshellcmd(trim($_POST{'csid'})));
+		echo json_encode($arr);
+		break
 
 	case 'killhard':
 		checkauth();
@@ -142,7 +158,6 @@ switch($_POST{'action'}) {
 		$arr{'txpackets'} = intval(getsysint("/sys/class/net/".escapeshellcmd(trim($_POST{'interface'}))."/statistics/tx_packets"));
 		echo json_encode($arr);
 		break;
-
 
 	default:
 		$arr{'status'} = "unknown command";
