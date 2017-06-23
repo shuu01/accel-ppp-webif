@@ -104,21 +104,21 @@ switch($_POST{'action'}) {
 		$arr = runcmd('accel-cmd show stat');
 		echo json_encode($arr);
 		break;
-	
-    case 'users':
-        checkauth();
-        $arr = runcmd('accel-cmd show sessions');
-        $strings = explode("\r\n", $arr{'output'});
-        $strings1 = [];
-        $count = count($strings);
-        for ($i = 2; $i < $count-1; $i++) {
-            $values = str_replace(' ', '', $strings[$i]);
-            $values = explode("|", $values);
-            $strings1[] = $values;
-        }
-        $arr{'output'} = $strings1;
-        echo json_encode($arr);
-        break;
+
+	case 'users':
+		checkauth();
+		$arr = runcmd('accel-cmd show sessions');
+		$strings = explode("\r\n", $arr{'output'});
+		$strings1 = [];
+		$count = count($strings);
+		for ($i = 2; $i < $count-1; $i++) {
+			$values = str_replace(' ', '', $strings[$i]);
+			$values = explode("|", $values);
+			$strings1[] = $values;
+		}
+		$arr{'output'} = $strings1;
+		echo json_encode($arr);
+		break;
 
 	case 'start_dump':
 		checkauth();
@@ -142,7 +142,7 @@ switch($_POST{'action'}) {
 		echo json_encode($arr);
 		break
 
-	case 'killhard':
+	case 'kill':
 		checkauth();
 		$arr = runcmd('accel-cmd terminate if '.escapeshellcmd(trim($_POST{'interface'}))." hard");
 		echo json_encode($arr);
