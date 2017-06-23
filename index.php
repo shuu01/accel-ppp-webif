@@ -18,6 +18,7 @@ body {
 </head>
 <body>
 <div id="ifchart"></div>
+<div id="tcpdump" style="display: none"></div>
 <div id="loadingdialog" style="text-align:center">Please wait...</div>
 <div id="logindialog">
 <div id="message"></div>
@@ -67,8 +68,8 @@ function requestData() {
 		return;
 	    }
             var series = chart.series[0],
-                shift = series.data.length > 20; // shift if the series is 
-                                                 // longer than 20
+                shift = series.data.length > 70;// shift if the series is 
+                                                 // longer than 70
 	    if ( typeof requestData.txbytes != 'undefined' ) {
 		var stampdiff = point.stamp - requestData.stamp;
 		var speedtx = (point.txbytes - requestData.txbytes) * 1000 * 8 / stampdiff;
@@ -111,12 +112,12 @@ function showchart (rate, username) {
             }
         },
         title: {
-            text: username + '|| ' + rate + ' kbps'
+            text: 'user: ' + username + ' || limit: ' + rate + ' kbps'
         },
         xAxis: {
             type: 'datetime',
             tickPixelInterval: 150,
-            maxZoom: 20 * 1000
+            minRange: 72000
         },
         yAxis: {
             minPadding: 0.2,
@@ -152,20 +153,79 @@ function showchart (rate, username) {
     });
 }
 
+function loaddump(intf) {
+    var winW = $(window).width() - 180;
+    var winH = $(window).height() - 180;
+    $("#tcpdump").html("<textarea id='output' name='output' style='width: 95%; height: 95%; max-width: 95%; max-height: 95%' readonly></textarea>");
+    $("#tcpdump").dialog({
+        title: intf,
+        height: winH,
+        width: winW,
+        modal: true,
+        buttons: [
+            {
+                text: "Start",
+                id: "btn-start",
+                click: function() {
+                    $("#btn-start").button("disable");
+                    $.ajax({
+                      url: 'data.php',
+                      data: { action: "start_dump", interface: intf },
+                      type: "POST",
+                      success: function(ret) {
+                          $("#output").text("tcpdump is running...");
+                      }
+                    });
+                    setTimeout(function() { $("#btn-stop").button("enable"); }, 3000);
+                }
+            },
+            {
+                text: "Stop",
+                id: "btn-stop",
+                disabled: true,
+                click: function() {
+                    $("#btn-stop").button("disable");
+                    $("#btn-start").button("enable");
+                    $.ajax({
+                      url: 'data.php',
+                      data: { action: "stop_dump", interface: intf },
+                      type: "POST",
+                      success: function(ret) {
+                          $("#output").text(ret.output);
+                      }
+                    });
+                }
+            }
+        ],
+        close: function() {
+            $.ajax({
+              url: 'data.php',
+              data: { action: "stop_dump", interface: intf },
+              type: "POST"
+            });
+        }
+    });
+}
+
 function reply_click(obj) {
     var username = $(obj).closest("tr").children("td:nth-of-type(2)").text();
     var intf = $(obj).closest("tr").children("td:nth-of-type(1)").text();
     var rate = $(obj).closest("tr").children("td:nth-of-type(5)").text().split("/")[0];
+    var csid = $(obj).closest("tr").children("td:nth-of-type(3)").text();
     var id = obj.id;
-    if (id == "watch") {
+    if (id == "watch" && intf) {
         chart_interface = intf;
         console.log('interface ' + intf);
         showchart(rate, username);
     }
+    else if (id == "dump") {
+        loaddump(intf);
+    }
     else {
+        if (!intf) { id = "drop" };
         $("#loadingdialog").dialog('open');
         $(".ui-dialog-titlebar").hide();
-        $.post("data.php", { action: id, interface: intf }, function (ret) {
+        $.post("data.php", { action: id, interface: intf, csid: csid }, function (ret) {
             setTimeout(function() {
                 $(".act").val('');
                 $("#loadingdialog").dialog('close');
@@ -173,6 +233,7 @@ function reply_click(obj) {
         });
     }
 }
+
 
 function loadmain() {
         $.post("data.php", { action: "stat" }, function (ret) {
@@ -184,72 +245,54 @@ function loadmain() {
 }
 
 function activator (event, ui) {
-	var tabname = ui.newPanel.attr('id');
+    var tabname = ui.newPanel.attr('id');
 
-	console.log('Activating tab ' + tabname);
-	if (tabname == "tablogout") {
-		$.post("data.php", { action: "logout" }, function (returned) {
-			location.reload();
-		});
-	}
-	if (oldtab == "tabusers") {
-		table.clear();
-		table.destroy();
-		table = null;
-		$("#tabusers").html('');
-	}
-	if (tabname == "tabmain") { loadmain(); }
-	if (tabname == "tabusers") {
-		$("#loadingdialog").dialog('open');
-		$(".ui-dialog-titlebar").hide();
-		$.post("data.php", { action: "users" }, function (ret) {
+    console.log('Activating tab ' + tabname);
+    if (tabname == "tablogout") {
+        $.post("data.php", { action: "logout" }, function (returned) {
+            location.reload();
+        });
+    }
+    if (oldtab == "tabusers") {
+        table.clear();
+        table.destroy();
+        table = null;
+        $("#tabusers").html('');
+    }
+    if (tabname == "tabmain") { loadmain(); }
+    if (tabname == "tabusers") {
+        $("#loadingdialog").dialog('open');
+        $(".ui-dialog-titlebar").hide();
+        $.post("data.php", { action: "users" }, function (ret) {
 			//console.log(ret.output);
-			$("#tabusers").html(ret.output);
-			$("#tabusers").prepend('<button id="refreshusers">Refresh</button>');
-			$("#refreshusers").button().click( function (e) {
-				$("#loadingdialog").dialog('open');
-				$(".ui-dialog-titlebar").hide();
-
-				 $("#mainscreen").tabs("option", "active", 0);
-				 setTimeout(function () { $("#mainscreen").tabs("option", "active", 1); }, 1000);
-			});
-			// Burp... ugly, but quick hack to remove +++---++ and so
-			$("tr:eq(1)").remove();
-			// Add action column
-			// fix and add thead, datatables love it and need it
-			$("#tusers").prepend($('<thead></thead>').append($('#tusers tr:first').remove()));
-			// and also th for better styling
-			//$("tr:first-child td").each(function() {
-			//	$(this).replaceWith('<th>' + $(this).text() + '</th>'); 
-			//});
-
-			$("#tusers tr:eq(0)").append('<th>Operation</th>');
-			$("#tusers tr:gt(0)" ).append('<td><button id="watch" style="float: left" onClick="reply_click(this)">Watch</button><button style="float: right; color: red;" onClick="reply_click(this)">Kill</button></td>');
-
-			$("#tusers tr").click( function() { 
-				// We can do something on row click... later.
-				//var username = $(this).children("td:nth-of-type(2)").text();
-			});
-
-			
-			table = $("#tusers").dataTable(
-				{ "iDisplayLength": 10,
-				  "columnDefs": [
-				  {
-				  // The `data` parameter refers to the data for the cell (defined by the
-                                  // `data` option, which defaults to the column being worked with, in
-                                  // this case `data: 0`.
-                                    "render": function ( data, type, row ) {
-                                      return '<a href="http://' + data + '" target="_blank">' + data + '</a>';
-                                    },
-                                  "targets": [2, 3]
-                                  }]
-				}).on('draw.dt');
-
-			// Get user detailed info
-			$("#loadingdialog").dialog('close');
-		});
-	}
+            $("#tabusers").html('<table id="tusers" class="cell-border compact"><thead><tr><th>ifname</th><th>username</th><th>calling-sid</th><th>ip</th><th>rate-limit</th><th>type</th><th>comp</th><th>state</th><th>uptime</th><th>Operation</th></tr></thead></table>');
+            $("#tabusers").prepend('<button id="refreshusers">Refresh</button>');
+            $("#refreshusers").button().click( function (e) {
+                $("#loadingdialog").dialog('open');
+                $(".ui-dialog-titlebar").hide();
+                $("#mainscreen").tabs("option", "active", 0);
+                setTimeout(function () { $("#mainscreen").tabs("option", "active", 1); }, 200);
+            });
+            //$("#tusers tr").click( function() {
+                // We can do something on row click... later.
+                //var username = $(this).children("td:nth-of-type(2)").text();
+            //});
+            table = $("#tusers").DataTable({ "data": ret.output, "iDisplayLength": 25, "columnDefs":[
+            // The `data` parameter refers to the data for the cell (defined by the
+            // `data` option, which defaults to the column being worked with, in
+            // this case `data: 0`.
+                { "render": function ( data, type, row ) { return '<a href="http://' + data + '" target="_blank">' + data + '</a>'; },
+                  "targets": [2, 3]
+                },
+                { "targets": -1,
+                  "width": "180px",
+                  "data": null,
+                  "defaultContent": '<div style="text-align: center; width: 100%"><button id="watch" style="display: inline-block; float: left" onClick="reply_click(this)">Watch</button><button id="dump" onClick="reply_click(this)">Dump</button><button id="kill" style="float: right; display: inline-block; color: red" onClick="reply_click(this)">Kill</button></div>'
+                }
+            ], });
+            $("#loadingdialog").dialog('close');
+        });
+    }
 }
 
 function showmainscreen () {
