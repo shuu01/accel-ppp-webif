@@ -140,7 +140,7 @@ switch($_POST{'action'}) {
 		checkauth();
 		$arr = runcmd('accel-cmd terminate csid '.escapeshellcmd(trim($_POST{'csid'})));
 		echo json_encode($arr);
-		break
+		break;
 
 	case 'kill':
 		checkauth();
