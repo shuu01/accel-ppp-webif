@@ -18,7 +18,7 @@ function semi_hash_equals ($str1, $str2) {
     $res = 0;
     if (strlen($str1) != strlen($str2)) { die("hash length mismatch"); }
     for ($i=0; $i<strlen($str1); $i++) {
-	$res = $str1[$i] - $str2[$i];
+	$res += $str1[$i] - $str2[$i];
     }
     return($res);
 }
@@ -57,7 +57,7 @@ function runcmd ($cmd) {
 	$f = popen($cmd, "r");
 	if ($f) {
 		while(!feof($f)) {
-			$arr{'output'} .= fread($f, 1024); 
+			$arr{'output'} .= fread($f, 1024);
 		}
 		pclose($f);
 	}
@@ -156,6 +156,17 @@ switch($_POST{'action'}) {
 		$arr{'txbytes'} = intval(getsysint("/sys/class/net/".escapeshellcmd(trim($_POST{'interface'}))."/statistics/tx_bytes"));
 		$arr{'rxpackets'} = intval(getsysint("/sys/class/net/".escapeshellcmd(trim($_POST{'interface'}))."/statistics/rx_packets"));
 		$arr{'txpackets'} = intval(getsysint("/sys/class/net/".escapeshellcmd(trim($_POST{'interface'}))."/statistics/tx_packets"));
+		echo json_encode($arr);
+		break;
+	
+	case 'showlogs':
+		checkauth();
+		$arr = array();
+		$arr{'output'} = shell_exec('cat /var/log/accel-ppp/accel-ppp.log | grep '.$_POST{'search'});
+		$output2 = preg_replace('/</m', "&lt", $arr{'output'});
+		$output2 = preg_replace('/>/m', "&gt", $output2);
+		$output2 = preg_replace('/\n/m', "<p>", $output2);
+		$arr{'output'} = $output2;
 		echo json_encode($arr);
 		break;
 
