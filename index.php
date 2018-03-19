@@ -35,7 +35,7 @@ body {
     <li><a href="#tabmain">Main</a></li>
     <li><a href="#tabusers">Users</a></li>
     <li><a href="mrtg/index.html">Graphs</a></li>
-    <li><a href="#tabsettings">Settings</a></li>
+    <li><a href="#tablogs">Logs</a></li>
     <li><a href="#tablogout">Logout</a></li>
   </ul>
   <div id="tabmain">
@@ -44,7 +44,10 @@ body {
   </div>
   <div id="tabusers">
   </div>
-  <div id="tabsettings">
+  <div id="tablogs">
+     <input type="text" id="search" value="" placeholder="Search by account..."><input type="button" id="searchbutton" value="ok">
+     <p>
+     <div id="logs" style="font-family: monospace"></div>
   </div>
   <div id="tablogout">
   </div>
@@ -244,6 +247,15 @@ function loadmain() {
 	}
 }
 
+function showlogs() {
+    $("#searchbutton").button().click( function(ev) {
+    	var value = $("#search").val();
+    	$.post("data.php", { action: "showlogs", search: value }, function (ret) {
+        $("#logs").html(ret.output);
+    	});
+    });
+}
+
 function activator (event, ui) {
     var tabname = ui.newPanel.attr('id');
 
@@ -260,6 +272,7 @@ function activator (event, ui) {
         $("#tabusers").html('');
     }
     if (tabname == "tabmain") { loadmain(); }
+    if (tabname == "tablogs") { showlogs(); }
     if (tabname == "tabusers") {
         $("#loadingdialog").dialog('open');
         $(".ui-dialog-titlebar").hide();
