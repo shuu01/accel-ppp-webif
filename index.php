@@ -2,12 +2,12 @@
 <html>
 <head>
 <title>accel-pppd</title>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/cupertino/jquery-ui.css">
-<link rel="stylesheet" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/cupertino/jquery-ui.css">
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
 <link href="//medialize.github.io/jQuery-contextMenu/src/jquery.contextMenu.css" rel="stylesheet" type="text/css" />
-<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="//code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
-<script src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script src="http://code.highcharts.com/highcharts.js"></script>
 <script src="http://code.highcharts.com/highcharts-more.js"></script>
 <style type="text/css">
@@ -64,49 +64,50 @@ var chart_interface; // TODO: change this ugly global variable?
 function requestData() {
     $.ajax({
         url: 'data.php',
-	data: { action: "ifstat", interface: chart_interface },
-	type: "POST",
+        data: { action: "ifstat", interface: chart_interface },
+        type: "POST",
         success: function(point) {
-	    if (chart == null) {
-		return;
-	    }
+            if (chart == null) { return; }
             var series = chart.series[0],
-                shift = series.data.length > 70;// shift if the series is 
-                                                 // longer than 70
-	    if ( typeof requestData.txbytes != 'undefined' ) {
-		var stampdiff = point.stamp - requestData.stamp;
-		var speedtx = (point.txbytes - requestData.txbytes) * 1000 * 8 / stampdiff;
-		var speedrx = (point.rxbytes - requestData.rxbytes) * 1000 * 8 / stampdiff;
-            	// add the point
-            	chart.series[0].addPoint([point.stamp, speedtx], true, shift);
-		chart.series[1].addPoint([point.stamp, speedrx], true, shift);
-	    }
-	    requestData.stamp = point.stamp;
+            // shift if the series is longer than 70
+            shift = series.data.length > 70;
+            if ( typeof requestData.txbytes != 'undefined' ) {
+                var stampdiff = point.stamp - requestData.stamp;
+                var speedtx = (point.txbytes - requestData.txbytes) * 1000 * 8 / stampdiff;
+                var speedrx = (point.rxbytes - requestData.rxbytes) * 1000 * 8 / stampdiff;
+                // add the point
+                chart.series[0].addPoint([point.stamp, speedtx], true, shift);
+                chart.series[1].addPoint([point.stamp, speedrx], true, shift);
+            }
+            requestData.stamp = point.stamp;
             requestData.txbytes = point.txbytes;
-	    requestData.rxbytes = point.rxbytes;
-            
+            requestData.rxbytes = point.rxbytes;
+
             // call it again after one second
-            setTimeout(requestData, 1000);    
+            setTimeout(requestData, 1000);
         },
         cache: false
     });
 }
 
 function showchart (rate, username) {
-	var winW = $(window).width() - 180;
-	var winH = $(window).height() - 180;
+    var winW = $(window).width() - 180;
+    var winH = $(window).height() - 180;
 
-	$("#ifchart").dialog({ height: winH, width: winW, modal: true,
-		close: function( event, ui ) {
-			delete requestData.txbytes;
-			delete requestData.rxbytes;
-			chart.destroy();
-			chart = null;
-		}
-	 });
-	Highcharts.setOptions({global: {useUTC: false}});
-	chart = new Highcharts.Chart({
+    $("#ifchart").dialog({
+        height: winH,
+        width: winW,
+        modal: true,
+        close: function( event, ui ) {
+            delete requestData.txbytes;
+            delete requestData.rxbytes;
+            chart.destroy();
+            chart = null;
+        }
+    });
 
+    Highcharts.setOptions({global: {useUTC: false}});
+    chart = new Highcharts.Chart({
         chart: {
             renderTo: 'ifchart',
             defaultSeriesType: 'line',
@@ -132,7 +133,7 @@ function showchart (rate, username) {
                 margin: 80
             }
         },
-	plotOptions: {
+        plotOptions: {
             line: {
                 dataLabels: {
                     enabled: true,
@@ -140,7 +141,7 @@ function showchart (rate, username) {
                         var value = (this.y);
                         if (value > 1024 * 1024) return (value/1024/1024).toPrecision(3) + 'M';
                         if (value > 1024) return Math.floor(value/1024) + 'K';
-		        return value;
+                        return value;
                     },
                 },
             enableMouseTracking: false
@@ -160,6 +161,7 @@ function loaddump(intf) {
     var winW = $(window).width() - 180;
     var winH = $(window).height() - 180;
     $("#tcpdump").html("<textarea id='output' name='output' style='width: 95%; height: 95%; max-width: 95%; max-height: 95%' readonly></textarea>");
+
     $("#tcpdump").dialog({
         title: intf,
         height: winH,
@@ -172,12 +174,12 @@ function loaddump(intf) {
                 click: function() {
                     $("#btn-start").button("disable");
                     $.ajax({
-                      url: 'data.php',
-                      data: { action: "start_dump", interface: intf },
-                      type: "POST",
-                      success: function(ret) {
-                          $("#output").text("tcpdump is running...");
-                      }
+                        url: 'data.php',
+                        data: { action: "start_dump", interface: intf },
+                        type: "POST",
+                        success: function(ret) {
+                            $("#output").text("tcpdump is running...");
+                        }
                     });
                     setTimeout(function() { $("#btn-stop").button("enable"); }, 3000);
                 }
@@ -190,21 +192,21 @@ function loaddump(intf) {
                     $("#btn-stop").button("disable");
                     $("#btn-start").button("enable");
                     $.ajax({
-                      url: 'data.php',
-                      data: { action: "stop_dump", interface: intf },
-                      type: "POST",
-                      success: function(ret) {
-                          $("#output").text(ret.output);
-                      }
+                        url: 'data.php',
+                        data: { action: "stop_dump", interface: intf },
+                        type: "POST",
+                        success: function(ret) {
+                            $("#output").text(ret.output);
+                        }
                     });
                 }
             }
         ],
         close: function() {
             $.ajax({
-              url: 'data.php',
-              data: { action: "stop_dump", interface: intf },
-              type: "POST"
+                url: 'data.php',
+                data: { action: "stop_dump", interface: intf },
+                type: "POST"
             });
         }
     });
@@ -237,22 +239,21 @@ function reply_click(obj) {
     }
 }
 
-
 function loadmain() {
-        $.post("data.php", { action: "stat" }, function (ret) {
-                $("#tabmain pre").html(ret.output);
-        });
-	if (autorefresh == 1) {
-		setTimeout(loadmain, 1000);
-	}
+    $.post("data.php", { action: "stat" }, function (ret) {
+        $("#tabmain pre").html(ret.output);
+    });
+    if (autorefresh == 1) {
+        setTimeout(loadmain, 1000);
+    }
 }
 
 function showlogs() {
     $("#searchbutton").button().click( function(ev) {
-    	var value = $("#search").val();
-    	$.post("data.php", { action: "showlogs", search: value }, function (ret) {
-        $("#logs").html(ret.output);
-    	});
+        var value = $("#search").val();
+        $.post("data.php", {action: "showlogs", search: value }, function (ret) {
+            $("#logs").html(ret.output);
+        });
     });
 }
 
@@ -277,8 +278,8 @@ function activator (event, ui) {
         $("#loadingdialog").dialog('open');
         $(".ui-dialog-titlebar").hide();
         $.post("data.php", { action: "users" }, function (ret) {
-			//console.log(ret.output);
-            $("#tabusers").html('<table id="tusers" class="cell-border compact"><thead><tr><th>ifname</th><th>username</th><th>calling-sid</th><th>ip</th><th>rate-limit</th><th>type</th><th>comp</th><th>state</th><th>uptime</th><th>Operation</th></tr></thead></table>');
+            //console.log(ret.output);
+            $("#tabusers").html('<table id="tusers" class="cell-border compact"></table>');
             $("#tabusers").prepend('<button id="refreshusers">Refresh</button>');
             $("#refreshusers").button().click( function (e) {
                 $("#loadingdialog").dialog('open');
@@ -287,81 +288,97 @@ function activator (event, ui) {
                 setTimeout(function () { $("#mainscreen").tabs("option", "active", 1); }, 200);
             });
 
-            table = $("#tusers").DataTable({ "data": ret.output, "iDisplayLength": 25, "columnDefs":[
-            // The `data` parameter refers to the data for the cell (defined by the
-            // `data` option, which defaults to the column being worked with, in
-            // this case `data: 0`.
-                { "render": function ( data, type, row ) { return '<a href="http://' + data + '" target="_blank">' + data + '</a>'; },
-                  "targets": [2, 3]
-                },
-                { "targets": -1,
-                  "width": "180px",
-                  "data": null,
-                  "defaultContent": '<div style="text-align: center; width: 100%"><button id="watch" style="display: inline-block; float: left" onClick="reply_click(this)">Watch</button><button id="dump" onClick="reply_click(this)">Dump</button><button id="kill" style="float: right; display: inline-block; color: red" onClick="reply_click(this)">Kill</button></div>'
-                }
-            ], });
+            table = $("#tusers").DataTable({
+                data: ret.output,
+                iDisplayLength: 25,
+                bLengthChange: false,
+                columns: [
+                    {title: "ifname"},
+                    {title: "username"},
+                    {title: "calling-sid"},
+                    {title: "ip"},
+                    {title: "rate-limit"},
+                    {title: "type"},
+                    {title: "comp"},
+                    {title: "state"},
+                    {title: "uptime"},
+                    {
+                        title: "operation",
+                        width: "20%",
+                        data: null,
+                        defaultContent:
+                            '<div style="text-align: center; width: 100%"><button id="watch" style="display: inline-block; float: left" onClick="reply_click(this)">Watch</button><button id="dump" onClick="reply_click(this)">Dump</button><button id="kill" style="float: right; display: inline-block; color: red" onClick="reply_click(this)">Kill</button></div>'
+                    }
+                ],
+                columnDefs: [
+                    {
+                        render: function ( data, type, row ) { return '<a href="http://' + data + '" target="_blank">' + data + '</a>'; },
+                        targets: [2, 3]
+                    },
+                ],
+            });
             $("#loadingdialog").dialog('close');
         });
     }
 }
 
 function showmainscreen () {
-	$("#mainscreen").show().tabs({
-		activate: activator
-	});
-	loadmain();
-	$("#autorefresh").button().click( function (ev) {
-		ev.preventDefault();
-		if (autorefresh == 0) {
-			$("#autorefresh").prop('value', 'Autorefresh: ON');
-			autorefresh = 1;
-			setTimeout(loadmain, 1000);
-		} else {
-			$("#autorefresh").prop('value', 'Autorefresh: OFF');
-			autorefresh = 0;
-		}
-	});
+    $("#mainscreen").show().tabs({
+        activate: activator
+    });
+    loadmain();
+    $("#autorefresh").button().click( function (ev) {
+        ev.preventDefault();
+        if (autorefresh == 0) {
+            $("#autorefresh").prop('value', 'Autorefresh: ON');
+            autorefresh = 1;
+            setTimeout(loadmain, 1000);
+        } else {
+            $("#autorefresh").prop('value', 'Autorefresh: OFF');
+            autorefresh = 0;
+        }
+    });
 }
 
 function trylogin(event) {
-	event.preventDefault();
-	var data = $('#flogin').serializeArray();
-	$.post("data.php", data, function (returned) {
-		if (returned.status == "OK") {
-			$("#logindialog").dialog("close");
-			showmainscreen();
-		} else {
-			$("#message").html(returned.status).css('color', 'red');
-			$("#flogin").hide();
-			// Remove message after while
-			setTimeout(function(){ $("#message").html(''); $("#flogin").show(); }, 1000);
-		}
-	});
+    event.preventDefault();
+    var data = $('#flogin').serializeArray();
+    $.post("data.php", data, function (returned) {
+        if (returned.status == "OK") {
+            $("#logindialog").dialog("close");
+            showmainscreen();
+        } else {
+            $("#message").html(returned.status).css('color', 'red');
+            $("#flogin").hide();
+            // Remove message after while
+            setTimeout(function(){ $("#message").html(''); $("#flogin").show(); }, 1000);
+        }
+    });
 }
 
 function prelogin(data) {
-	if (data.authenticated == 1) {
-		// We are already authenticated
-		showmainscreen();
-	} else {
-		if (data.login) {
-			$("#login").val(data.login);
-		}
-		$("#logindialog").dialog('open');
-	}
+    if (data.authenticated == 1) {
+        // We are already authenticated
+        showmainscreen();
+    } else {
+        if (data.login) {
+            $("#login").val(data.login);
+        }
+        $("#logindialog").dialog('open');
+    }
 }
 
 $(document).ready(function(){
-	$("#mainscreen").hide();
-	$("#logindialog").dialog({ autoOpen: false, buttons: [ { text: "Login", click: trylogin } ], title: "accel-ppp login", open: function() {
-          $("#logindialog").keypress(function(e) {
+    $("#mainscreen").hide();
+    $("#logindialog").dialog({ autoOpen: false, buttons: [ { text: "Login", click: trylogin } ], title: "accel-ppp login", open: function() {
+        $("#logindialog").keypress(function(e) {
             if (e.keyCode == $.ui.keyCode.ENTER) {
-              $(this).parent().find("button:eq(1)").trigger("click");
+                $(this).parent().find("button:eq(1)").trigger("click");
             }
-          });
-        } });
-	$("#loadingdialog").dialog({ autoOpen: false, modal: true });
-	$.post( "data.php", { action: "prelogin" }, prelogin );
+        });
+    } });
+    $("#loadingdialog").dialog({ autoOpen: false, modal: true });
+    $.post( "data.php", { action: "prelogin" }, prelogin );
 });
 </script>
 </body>
